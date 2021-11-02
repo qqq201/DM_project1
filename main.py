@@ -5,11 +5,24 @@ class dataframe:
         self.data = []
         self.attr_id = dict()
 
+
     def load_csv(self, file):
-        pass
+        with open(file, newline='') as f:
+            reader = csv.reader(f)
+            self.data = list(reader)
+
+            for attr, i in zip(self.data[0], range(len(self.data[0]))):
+                self.attr_id[attr] = i
+
+            self.data = self.data[1:]
+
 
     def save_csv(self, file):
-        pass
+        with open(file, 'w') as f:
+            write = csv.writer(f)
+            write.writerow(self.attr_id.keys())
+            write.writerows(self.data)
+
 
     def attr_missing_value(self):
         pass
@@ -55,7 +68,9 @@ class dataframe:
 
 
 def main():
-    pass
+    df = dataframe()
+    df.load_csv("test.csv")
+    df.save_csv("test2.csv")
 
 
 if __name__ == '__main__':
