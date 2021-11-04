@@ -1,76 +1,54 @@
-import csv
-
-class dataframe:
-    def __init__(self):
-        self.data = []
-        self.attr_id = dict()
-
-
-    def load_csv(self, file):
-        with open(file, newline='') as f:
-            reader = csv.reader(f)
-            self.data = list(reader)
-
-            for attr, i in zip(self.data[0], range(len(self.data[0]))):
-                self.attr_id[attr] = i
-
-            self.data = self.data[1:]
-
-
-    def save_csv(self, file):
-        with open(file, 'w') as f:
-            write = csv.writer(f)
-            write.writerow(self.attr_id.keys())
-            write.writerows(self.data)
-
-
-    def attr_missing_value(self):
-        pass
-
-    def nrows_missing_value(self):
-        pass
-
-    def substitute_mean(self):
-        pass
-
-    def substitue_median(self):
-        pass
-
-    def substitue_mode(self):
-        pass
-
-    def remove_attr(self, threshold):
-        pass
-
-    def remove_duplicate(self):
-        pass
-
-    def min_max_normalize(self):
-        pass
-
-    def z_score_normalize(self):
-        pass
-
-    def plus(self, attr1, attr2):
-        pass
-
-    def minus(self, attr1, attr2):
-        pass
-
-    def multiply(self, attr1, attr2):
-        pass
-
-    def divide(self, attr1, attr2):
-        pass
-
-    def calculate(self, expression):
-        pass
+from dataframe import *
+import argparse
 
 
 def main():
     df = dataframe()
-    df.load_csv("test.csv")
-    df.save_csv("test2.csv")
+
+    parser = argparse.ArgumentParser()
+    parser.add_argument("input", help="Input file", type=str)
+    subparsers = parser.add_subparsers()
+
+    parser_lm = subparsers.add_parser('list-missing')
+    parser_lm.set_defaults(function=df.list_missing)
+
+    parser_cm = subparsers.add_parser('count-missing')
+    parser_cm.set_defaults(function=df.count_nrows_missing)
+
+    parser_i = subparsers.add_parser('impute')
+    parser_i.add_argument('--method', type=str, required=True)
+    parser_i.add_argument('--attributes', type=str, nargs='+', required=True)
+    parser_i.add_argument('--output', type=str)
+    parser_i.set_defaults(function=df.impute)
+
+    parser_rm = subparsers.add_parser('remove-missing')
+    parser_rm.add_argument('--type', type=str, required=True)
+    parser_rm.add_argument('--threshold', type=int, required=True)
+    parser_rm.add_argument('--output', type=str)
+    parser_rm.set_defaults(function=df.remove_missing)
+
+    parser_rd = subparsers.add_parser('remove-duplicate')
+    parser_rd.add_argument('--output', type=str, required=True)
+    parser_rd.set_defaults(function=df.remove_duplicate)
+
+    parser_n = subparsers.add_parser('normalize')
+    parser_n.add_argument('--method', type=str, required=True)
+    parser_n.add_argument('--attribute', type=str, required=True)
+    parser_n.add_argument('--output', type=str)
+    parser_n.set_defaults(function=df.normalize)
+
+    parser_m = subparsers.add_parser('mutate')
+    parser_m.add_argument('--new-attr', type=str, required=True)
+    parser_m.add_argument('--expression', type=str, required=True)
+    parser_m.add_argument('--output', type=str)
+    parser_m.set_defaults(function=df.mutate)
+
+    args = parser.parse_args()
+
+    if args.input is not None:
+        df.load_csv(args.input)
+
+    args.function(args)
 
 
 if __name__ == '__main__':
