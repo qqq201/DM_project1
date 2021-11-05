@@ -46,6 +46,10 @@ class dataframe:
         pass
 
     def impute_mode(self, attrbutes):
+        '''
+        impute missing line of attributes with mode
+        attributes is a list of attrbutes need to be imputed
+        '''
         pass
 
     def impute(self, args):
@@ -63,6 +67,9 @@ class dataframe:
 
 
     def remove_missing_rows(self, threshold):
+        '''
+        remove missing rows with a threshold
+        '''
         pass
 
     def remove_missing_attr(self, threshold):
@@ -78,15 +85,26 @@ class dataframe:
 
 
     def remove_duplicate(self, args):
+        '''
+        remove duplicate rows
+        '''
         # implement here
+
+        # save new file
         self.save_csv(args.output)
 
 
     def min_max_normalize(self, attribute):
+        '''
+        normalize attribute by min max method
+        '''
         pass
 
 
     def z_score_normalize(self, attribute):
+        '''
+        normalize attribute by z score method
+        '''
         pass
 
 
