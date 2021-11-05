@@ -1,5 +1,53 @@
 import csv
 
+def correct_datatype(c):
+    if c == '':
+        return None
+
+    try:
+        if str(int(c)) == c: return int(c)
+    except ValueError:
+        return c
+    try:
+        if str(float(c)) == c: return float(c)
+    except ValueError:
+        return c
+
+
+def mean(arr):
+    n = 0
+    sum = 0
+
+    # calculate mean
+    for i in range(len(arr)):
+        if arr[i] is not None:
+            sum += arr[i]
+            n += 1
+
+    return sum / n
+
+
+def median(arr):
+    # find available values
+    values = []
+
+    for value in arr:
+        if value is not None:
+            values.append(value)
+
+    # sorting values
+    values.sort()
+
+    # find median
+    n = len(values)
+    mid = (n-1)//2
+
+    if n % 2:
+        return values[mid]
+    else:
+        return (values[mid] + values[mid + 1]) / 2
+
+
 class dataframe:
     def __init__(self):
         self.data = []
@@ -18,8 +66,7 @@ class dataframe:
             for attr, i in zip(self.data[0], range(len(self.data[0]))):
                 self.attr_id[attr] = i
 
-            # remove header
-            self.data = self.data[1:]
+        self.data = [[correct_datatype(entry) for entry in row] for row in self.data[1:]]
 
 
     def save_csv(self, file):
@@ -31,21 +78,73 @@ class dataframe:
             write.writerows(self.data)
 
 
+    def get_column(self, attr):
+        return [row[self.attr_id[attr]] for row in self.data]
+
+
     def list_missing(self, args):
-        pass
+        print("Missing value attributes: ", end="")
+        for attr in self.attr_id.keys():
+            column = self.get_column(attr)
+
+            if any(value is None for value in column):
+                print(attr, end=", ")
 
 
     def count_nrows_missing(self, args):
-        pass
+        count = 0
+
+        for row in self.data:
+            if any(value == None for value in row):
+                count += 1
+
+        print(f"Number of rows has missing value: {count}")
 
 
-    def impute_mean(self, attrbutes):
-        pass
+    def impute_mean(self, attributes):
+        for attr in attributes:
+            if attr in self.attr_id.keys():
+                datatype = type(self.data[0][self.attr_id[attr]])
+                if datatype == float or datatype == int:
+                    # get column
+                    column = self.get_column(attr)
 
-    def impute_median(self, attrbutes):
-        pass
+                    # calculate mean
+                    mean = mean(column)
 
-    def impute_mode(self, attrbutes):
+                    # impute mean
+                    for i in range(len(column)):
+                        if column[i] is None:
+                            self.data[i][self.attr_id[attr]] = mean
+                else:
+                    print(f"{attr} is not numeric!")
+            else:
+                print(f"Does not exist {attr}")
+
+
+    def impute_median(self, attributes):
+        for attr in attributes:
+            if attr in self.attr_id.keys():
+                datatype = type(self.data[0][self.attr_id[attr]])
+                if datatype == float or datatype == int:
+                    # get column
+                    column = self.get_column(attr)
+
+                    # calculate median
+                    median = median(column)
+
+                    # impute mean
+                    for i in range(len(column)):
+                        if column[i] is None:
+                            self.data[i][self.attr_id[attr]] = median
+                else:
+                    print(f"{attr} is not numeric!")
+            else:
+                print(f"Does not exist {attr}")
+
+
+
+    def impute_mode(self, attributes):
         '''
         impute missing line of attributes with mode
         attributes is a list of attrbutes need to be imputed
