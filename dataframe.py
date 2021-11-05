@@ -51,9 +51,7 @@ def median(arr):
 class dataframe:
     def __init__(self):
         self.data = []
-
-        # dictionary mapping attribute with its index
-        self.attr_id = dict()
+        self.attributes = []
 
 
     def load_csv(self, file):
@@ -61,10 +59,7 @@ class dataframe:
             # read data as 2d list
             reader = csv.reader(f)
             self.data = list(reader)
-
-            # mapping attributes with indices
-            for attr, i in zip(self.data[0], range(len(self.data[0]))):
-                self.attr_id[attr] = i
+            self.attributes = self.data[0]
 
         self.data = [[correct_datatype(entry) for entry in row] for row in self.data[1:]]
 
@@ -73,22 +68,24 @@ class dataframe:
         with open(file, 'w') as f:
             write = csv.writer(f)
             # write the header
-            write.writerow(self.attr_id.keys())
+            write.writerow(self.attributes)
+
             # write data
             write.writerows(self.data)
 
 
     def get_column(self, attr):
-        return [row[self.attr_id[attr]] for row in self.data]
+        index = self.attributes.index(attr)
+        return [row[index] for row in self.data]
 
 
     def list_missing(self, args):
         print("Missing value attributes: ", end="")
-        for attr in self.attr_id.keys():
-            column = self.get_column(attr)
+        for i in range(len(self.attributes)):
+            column = [row[i] for row in self.data]
 
             if any(value is None for value in column):
-                print(attr, end=", ")
+                print(self.attributes[i], end=", ")
 
 
     def count_nrows_missing(self, args):
@@ -103,19 +100,19 @@ class dataframe:
 
     def impute_mean(self, attributes):
         for attr in attributes:
-            if attr in self.attr_id.keys():
-                datatype = type(self.data[0][self.attr_id[attr]])
-                if datatype == float or datatype == int:
-                    # get column
-                    column = self.get_column(attr)
+            if attr in self.attributes:
+                column = self.get_column(attr)
+                datatype = type(column[0])
 
+                if datatype == float or datatype == int:
                     # calculate mean
-                    mean = mean(column)
+                    substitute = mean(column)
 
                     # impute mean
-                    for i in range(len(column)):
-                        if column[i] is None:
-                            self.data[i][self.attr_id[attr]] = mean
+                    c = self.attributes.index(attr)
+                    for r in range(len(column)):
+                        if column[r] is None:
+                            self.data[r][c] = substitute
                 else:
                     print(f"{attr} is not numeric!")
             else:
@@ -124,19 +121,19 @@ class dataframe:
 
     def impute_median(self, attributes):
         for attr in attributes:
-            if attr in self.attr_id.keys():
-                datatype = type(self.data[0][self.attr_id[attr]])
+            if attr in self.attributes:
+                column = self.get_column(attr)
+                datatype = type(column[0])
+
                 if datatype == float or datatype == int:
-                    # get column
-                    column = self.get_column(attr)
-
                     # calculate median
-                    median = median(column)
+                    substitute = median(column)
 
-                    # impute mean
-                    for i in range(len(column)):
-                        if column[i] is None:
-                            self.data[i][self.attr_id[attr]] = median
+                    # impute median
+                    c = self.attributes.index(attr)
+                    for r in range(len(column)):
+                        if column[r] is None:
+                            self.data[r][c] = substitute
                 else:
                     print(f"{attr} is not numeric!")
             else:
@@ -161,7 +158,8 @@ class dataframe:
         else:
             print("Unknown method: Only mean, median and mode are accepted");
 
-        self.save_csv(args.output)
+        if args.output:
+            self.save_csv(args.output)
 
 
 
@@ -171,16 +169,38 @@ class dataframe:
         '''
         pass
 
-    def remove_missing_attr(self, threshold):
-        pass
+    def remove_missing_cols(self, threshold):
+        n = len(self.data)
+        m = len(self.attributes)
+
+        missing_rates = [0 for _ in range(m)]
+
+        # count number missing row
+        for r in range(n):
+            for c in range(m):
+                if self.data[r][c] is None:
+                    missing_rates[c] += 1
+
+        remain_index = []
+
+        for index in range(m):
+            if missing_rates[index] * 100 / n <= threshold:
+                remain_index.append(index)
+            else:
+                self.attributes.pop(index)
+
+        self.data = [[self.data[r][i] for i in remain_index] for r in range(n)]
+
 
     def remove_missing(self, args):
         if args.type == "row":
             self.remove_missing_rows(args.threshold)
         elif args.type == "column":
-            self.remove_missing_attr(args.threshold)
+            self.remove_missing_cols(args.threshold)
         else:
             print("Unknown type: Only row and column are accepted");
+
+        self.save_csv(args.output)
 
 
     def remove_duplicate(self, args):
