@@ -39,7 +39,7 @@ def main():
 
     parser_m = subparsers.add_parser('mutate')
     parser_m.add_argument('--new-attr', type=str, required=True)
-    parser_m.add_argument('--expression', type=str, required=True)
+    parser_m.add_argument('--expression', type=str, required=True, nargs='+')
     parser_m.add_argument('--output', type=str)
     parser_m.set_defaults(function=df.mutate)
 

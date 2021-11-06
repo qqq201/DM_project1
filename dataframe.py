@@ -1,4 +1,5 @@
 import csv
+from expression_handle import *
 
 def correct_datatype(c):
     if c == '':
@@ -48,6 +49,7 @@ def median(arr):
         return (values[mid] + values[mid + 1]) / 2
 
 
+
 class dataframe:
     def __init__(self):
         self.data = []
@@ -75,7 +77,13 @@ class dataframe:
 
 
     def get_column(self, attr):
-        index = self.attributes.index(attr)
+        index = 0
+        try:
+            index = self.attributes.index(attr)
+        except ValueError:
+            print(f"Does not exist {attr}")
+            return None
+
         return [row[index] for row in self.data]
 
 
@@ -100,8 +108,8 @@ class dataframe:
 
     def impute_mean(self, attributes):
         for attr in attributes:
-            if attr in self.attributes:
-                column = self.get_column(attr)
+            column = self.get_column(attr)
+            if column is not None:
                 datatype = type(column[0])
 
                 if datatype == float or datatype == int:
@@ -121,8 +129,8 @@ class dataframe:
 
     def impute_median(self, attributes):
         for attr in attributes:
-            if attr in self.attributes:
-                column = self.get_column(attr)
+            column = self.get_column(attr)
+            if column is not None:
                 datatype = type(column[0])
 
                 if datatype == float or datatype == int:
@@ -148,6 +156,7 @@ class dataframe:
         '''
         pass
 
+
     def impute(self, args):
         if args.method == 'mean':
             self.impute_mean(args.attributes)
@@ -169,6 +178,7 @@ class dataframe:
         '''
         pass
 
+        
     def remove_missing_cols(self, threshold):
         n = len(self.data)
         m = len(self.attributes)
@@ -239,5 +249,40 @@ class dataframe:
 
 
     def mutate(self, args):
-        new_attr = args.new_attr
-        expression = args.expression
+        expression = ' '.join(args.expression)
+
+        # calculate expression using Polish Notation
+        # convert to postfix order
+        postfix = PostorderConvert(expression)
+        s = [];
+        l = len(postfix);
+
+        for entry in postfix:
+            if is_alphabet(entry[0]):
+                column = self.get_column(entry)
+                if column is not None:
+                    datatype = type(column[0])
+
+                    if datatype == float or datatype == int:
+                        s.append(column)
+                    else:
+                        print(f"{entry} is not numberic. Can not execute operation on non-numeric attribute.")
+                        return
+                else:
+                    return
+            else:
+                a = s[-1]
+                s.pop()
+                b = s[-1]
+                s.pop()
+                s.append(operate(b, a, entry))
+
+
+        # add new attribute
+        self.attributes.append(args.new_attr)
+
+        for i in range(len(s[0])):
+            self.data[i].append(s[0][i])
+
+        if args.output:
+            self.save_csv(args.output)

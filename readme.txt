@@ -44,7 +44,7 @@ Example:
 
 
 7. Calculate expression
->   py main.py <input file> mutate --new-attr=<name> --expression=<expression> --output=output.csv
+>   py main.py <input file> mutate --new-attr=<name> --expression <expression> --output=output.csv
 
 Example:
-    py main.py input.csv mutate --new-attr=S --expression=v + g*t --output=output.csv
+    py main.py input.csv mutate --new-attr=bmi --expression weight / (height * height) --output=output.csv
