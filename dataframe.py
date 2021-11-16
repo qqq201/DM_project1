@@ -52,8 +52,8 @@ def median(arr):
 
 class dataframe:
     def __init__(self):
-        self.data = []
-        self.attributes = []
+        self.data = []  # 2D array
+        self.attributes = [] # name
 
 
     def load_csv(self, file):
@@ -154,6 +154,8 @@ class dataframe:
         impute missing line of attributes with mode
         attributes is a list of attrbutes need to be imputed
         '''
+        
+
         pass
 
 

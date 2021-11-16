@@ -1,7 +1,6 @@
 from dataframe import *
 import argparse
 
-
 def main():
     df = dataframe()
 
@@ -52,4 +51,16 @@ def main():
 
 
 if __name__ == '__main__':
-    main()
+    #main()
+    df = dataframe()
+    df.load_csv("test.csv")
+    #print(df.data)
+    #print(df.attributes)
+
+    Dict = {}
+    print(Dict)
+
+    print(len(df.data[0]))
+    
+    for i in range(len(df.data[0])):
+        pass
