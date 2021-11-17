@@ -1,4 +1,6 @@
 import csv
+
+from numpy import sqrt
 from expression_handle import *
 
 def correct_datatype(c):
@@ -48,12 +50,50 @@ def median(arr):
     else:
         return (values[mid] + values[mid + 1]) / 2
 
+def mode(arr):
+    Dict = {}
 
+    for value in arr:
+        if value in Dict:
+            Dict[value] = Dict[value] + 1
+        else:
+            Dict[value] = 1
+
+    m = 0
+    for key in Dict:
+        if Dict[key] > m :
+            m = Dict[key]
+
+    return m
+
+def min(arr):
+    if arr != None:
+        m = arr[0]
+        for i in arr:
+            if i < m:
+                m = i
+    
+    return m
+
+def max(arr):
+    if arr != None:
+        m = arr[0]
+        for i in arr:
+            if i > m:
+                m = i
+    
+    return m
+
+def standard_deviation(arr, mean, n):
+    s = 0
+    for i in range(n):
+        s = (arr[i] - mean)**2 + s
+    return sqrt(s / n)
 
 class dataframe:
     def __init__(self):
-        self.data = []
-        self.attributes = []
+        self.data = []  # 2D array
+        self.attributes = [] # name
 
 
     def load_csv(self, file):
@@ -114,7 +154,7 @@ class dataframe:
 
                 if datatype == float or datatype == int:
                     # calculate mean
-                    substitute = mean(column)
+                    substitute = mode(column)
 
                     # impute mean
                     c = self.attributes.index(attr)
@@ -134,10 +174,10 @@ class dataframe:
                 datatype = type(column[0])
 
                 if datatype == float or datatype == int:
-                    # calculate median
-                    substitute = median(column)
+                    # calculate mode
+                    substitute = mode(column)
 
-                    # impute median
+                    # impute mode
                     c = self.attributes.index(attr)
                     for r in range(len(column)):
                         if column[r] is None:
@@ -154,7 +194,24 @@ class dataframe:
         impute missing line of attributes with mode
         attributes is a list of attrbutes need to be imputed
         '''
-        pass
+        for attr in attributes:
+            column = self.get_column(attr)
+            if column is not None:
+                datatype = type(column[0])
+
+                if datatype == float or datatype == int:
+                    # calculate median
+                    substitute = mode(column)
+
+                    # impute median
+                    c = self.attributes.index(attr)
+                    for r in range(len(column)):
+                        if column[r] is None:
+                            self.data[r][c] = substitute
+                else:
+                    print(f"{attr} is not numeric!")
+            else:
+                print(f"Does not exist {attr}")
 
 
     def impute(self, args):
@@ -176,12 +233,29 @@ class dataframe:
         '''
         remove missing rows with a threshold
         '''
-        pass
+        n = len(self.data) 
+        m = len(self.attributes)
+
+        missing_rates = [0 for _ in range(n)]
+
+        # count number missing row
+        for r in range(n):
+            for c in range(m):
+                if self.data[r][c] is None:
+                    missing_rates[r] += 1
+
+        remain_index = []
+
+        for index in range(n):
+            if missing_rates[index] * 100 / n <= threshold:
+                remain_index.append(index)
+
+        self.data = [[self.data[r][c] for c in range(m)] for r in range(n) if r in remain_index]
 
         
     def remove_missing_cols(self, threshold):
-        n = len(self.data)
-        m = len(self.attributes)
+        n = len(self.data) #32
+        m = len(self.attributes) #12
 
         missing_rates = [0 for _ in range(m)]
 
@@ -218,6 +292,16 @@ class dataframe:
         remove duplicate rows
         '''
         # implement here
+        n = len(self.data) 
+        m = len(self.attributes)
+
+        delete_id = []
+        for i in range(len(self.data)):
+            for j in range(i+1,len(self.data),1):
+                if (self.data[i] == self.data[j]):
+                    delete_id.append(j)
+
+        self.data = [[self.data[r][c] for c in range(m)] for r in range(n) if r not in delete_id]
 
         # save new file
         self.save_csv(args.output)
@@ -227,14 +311,46 @@ class dataframe:
         '''
         normalize attribute by min max method
         '''
-        pass
+        column = self.get_column(attribute)
+        if column is not None:
+            datatype = type(column[0])
+
+            if datatype == float or datatype == int:
+                column_min = min(column)
+                column_max = max(column)
+                data_norm = [ (c - column_min) / (column_max - column_min) for c in column]
+                
+                id_column = self.attributes.index(attribute)
+
+                for i in range(len(self.data)):
+                    self.data[i][id_column] = data_norm[i]
+                
+            else:
+                print(f"{attribute} is not numeric!")
+        else:
+            print(f"Does not exist {attribute}")
 
 
     def z_score_normalize(self, attribute):
         '''
         normalize attribute by z score method
         '''
-        pass
+        column = self.get_column(attribute)
+        if column is not None:
+            datatype = type(column[0])
+
+            if datatype == float or datatype == int:
+                column_mean = mean(column)
+                column_std = standard_deviation(column,column_mean, len(column))
+
+                id_column = self.attributes.index(attribute)
+                for i in range(len(self.data)):
+                    self.data[i][id_column] = (column[i] - column_mean) / column_std
+                
+            else:
+                print(f"{attribute} is not numeric!")
+        else:
+            print(f"Does not exist {attribute}")
 
 
     def normalize(self, args):

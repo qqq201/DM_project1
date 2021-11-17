@@ -1,7 +1,6 @@
 from dataframe import *
 import argparse
 
-
 def main():
     df = dataframe()
 
