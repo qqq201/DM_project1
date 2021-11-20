@@ -244,7 +244,7 @@ class Dataframe:
             if column is not None:
                 datatype = type(column[0])
 
-                if datatype == float or datatype == int:
+                if datatype == str:
                     # calculate mode
                     substitute = mode(column)
 
@@ -254,7 +254,7 @@ class Dataframe:
                         if column[r] is None:
                             self.data[r][c] = substitute
                 else:
-                    print(f"{attr} is not numeric!")
+                    print(f"{attr} is not nominal!")
             else:
                 print(f"Does not exist {attr}")
 
