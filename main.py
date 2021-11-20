@@ -2,7 +2,7 @@ from dataframe import *
 import argparse
 
 def main():
-    df = dataframe()
+    df = Dataframe()
 
     parser = argparse.ArgumentParser()
     parser.add_argument("input", help="Input file", type=str)

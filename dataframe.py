@@ -1,9 +1,11 @@
 import csv
-
-from numpy import sqrt
+import math
 from expression_handle import *
 
 def correct_datatype(c):
+    '''
+        convert string to its true datatype
+    '''
     if c == '':
         return None
 
@@ -18,6 +20,9 @@ def correct_datatype(c):
 
 
 def mean(arr):
+    '''
+        find mean from array
+    '''
     n = 0
     sum = 0
 
@@ -31,6 +36,9 @@ def mean(arr):
 
 
 def median(arr):
+    '''
+        find median array
+    '''
     # find available values
     values = []
 
@@ -50,7 +58,13 @@ def median(arr):
     else:
         return (values[mid] + values[mid + 1]) / 2
 
+
 def mode(arr):
+    '''
+        find mode from array
+    '''
+
+    # calculate frequency of each value in array
     Dict = {}
 
     for value in arr:
@@ -59,6 +73,7 @@ def mode(arr):
         else:
             Dict[value] = 1
 
+    # find value with maximum frequency
     m = 0
     for key in Dict:
         if Dict[key] > m :
@@ -66,31 +81,47 @@ def mode(arr):
 
     return m
 
+
 def min(arr):
+    '''
+        find min of array
+    '''
     if arr != None:
         m = arr[0]
         for i in arr:
             if i < m:
                 m = i
-    
+
     return m
 
+
 def max(arr):
+    '''
+        find max of array
+    '''
     if arr != None:
         m = arr[0]
         for i in arr:
             if i > m:
                 m = i
-    
+
     return m
 
+
 def standard_deviation(arr, mean, n):
+    '''
+        calculate standard_deviation from array
+    '''
+    if mean is None:
+        mean = mean(arr)
+
     s = 0
     for i in range(n):
-        s = (arr[i] - mean)**2 + s
-    return sqrt(s / n)
+        s += (arr[i] - mean)**2
+    return math.sqrt(s / n)
 
-class dataframe:
+
+class Dataframe:
     def __init__(self):
         self.data = []  # 2D array
         self.attributes = [] # name
@@ -117,6 +148,9 @@ class dataframe:
 
 
     def get_column(self, attr):
+        '''
+            get a column based on attribute name
+        '''
         index = 0
         try:
             index = self.attributes.index(attr)
@@ -128,6 +162,9 @@ class dataframe:
 
 
     def list_missing(self, args):
+        '''
+            list attributes have missing value
+        '''
         print("Missing value attributes: ", end="")
         for i in range(len(self.attributes)):
             column = [row[i] for row in self.data]
@@ -137,6 +174,9 @@ class dataframe:
 
 
     def count_nrows_missing(self, args):
+        '''
+            count number of rows has missing value
+        '''
         count = 0
 
         for row in self.data:
@@ -147,6 +187,9 @@ class dataframe:
 
 
     def impute_mean(self, attributes):
+        '''
+            impute missing value with mean
+        '''
         for attr in attributes:
             column = self.get_column(attr)
             if column is not None:
@@ -168,6 +211,9 @@ class dataframe:
 
 
     def impute_median(self, attributes):
+        '''
+            impute missing value with mean
+        '''
         for attr in attributes:
             column = self.get_column(attr)
             if column is not None:
@@ -191,8 +237,7 @@ class dataframe:
 
     def impute_mode(self, attributes):
         '''
-        impute missing line of attributes with mode
-        attributes is a list of attrbutes need to be imputed
+            impute missing value with mode
         '''
         for attr in attributes:
             column = self.get_column(attr)
@@ -200,10 +245,10 @@ class dataframe:
                 datatype = type(column[0])
 
                 if datatype == float or datatype == int:
-                    # calculate median
+                    # calculate mode
                     substitute = mode(column)
 
-                    # impute median
+                    # impute mode
                     c = self.attributes.index(attr)
                     for r in range(len(column)):
                         if column[r] is None:
@@ -215,6 +260,9 @@ class dataframe:
 
 
     def impute(self, args):
+        '''
+            handle impute command
+        '''
         if args.method == 'mean':
             self.impute_mean(args.attributes)
         elif args.method == 'median':
@@ -224,6 +272,7 @@ class dataframe:
         else:
             print("Unknown method: Only mean, median and mode are accepted");
 
+        # save file
         if args.output:
             self.save_csv(args.output)
 
@@ -231,14 +280,14 @@ class dataframe:
 
     def remove_missing_rows(self, threshold):
         '''
-        remove missing rows with a threshold
+            remove missing rows with a threshold
         '''
-        n = len(self.data) 
+        n = len(self.data)
         m = len(self.attributes)
 
         missing_rates = [0 for _ in range(n)]
 
-        # count number missing row
+        # count number missing columns
         for r in range(n):
             for c in range(m):
                 if self.data[r][c] is None:
@@ -252,14 +301,17 @@ class dataframe:
 
         self.data = [[self.data[r][c] for c in range(m)] for r in range(n) if r in remain_index]
 
-        
+
     def remove_missing_cols(self, threshold):
-        n = len(self.data) #32
-        m = len(self.attributes) #12
+        '''
+            remove missing columns with a threshold
+        '''
+        n = len(self.data)
+        m = len(self.attributes)
 
         missing_rates = [0 for _ in range(m)]
 
-        # count number missing row
+        # count number missing rows
         for r in range(n):
             for c in range(m):
                 if self.data[r][c] is None:
@@ -277,6 +329,9 @@ class dataframe:
 
 
     def remove_missing(self, args):
+        '''
+            handle remove missing command
+        '''
         if args.type == "row":
             self.remove_missing_rows(args.threshold)
         elif args.type == "column":
@@ -284,15 +339,17 @@ class dataframe:
         else:
             print("Unknown type: Only row and column are accepted");
 
-        self.save_csv(args.output)
+        # save file
+        if args.output:
+            self.save_csv(args.output)
 
 
     def remove_duplicate(self, args):
         '''
-        remove duplicate rows
+            remove duplicated rows
         '''
         # implement here
-        n = len(self.data) 
+        n = len(self.data)
         m = len(self.attributes)
 
         delete_id = []
@@ -303,13 +360,14 @@ class dataframe:
 
         self.data = [[self.data[r][c] for c in range(m)] for r in range(n) if r not in delete_id]
 
-        # save new file
-        self.save_csv(args.output)
+        # save file
+        if args.output:
+            self.save_csv(args.output)
 
 
     def min_max_normalize(self, attribute):
         '''
-        normalize attribute by min max method
+            normalize attribute by min max method
         '''
         column = self.get_column(attribute)
         if column is not None:
@@ -319,12 +377,12 @@ class dataframe:
                 column_min = min(column)
                 column_max = max(column)
                 data_norm = [ (c - column_min) / (column_max - column_min) for c in column]
-                
+
                 id_column = self.attributes.index(attribute)
 
                 for i in range(len(self.data)):
                     self.data[i][id_column] = data_norm[i]
-                
+
             else:
                 print(f"{attribute} is not numeric!")
         else:
@@ -333,7 +391,7 @@ class dataframe:
 
     def z_score_normalize(self, attribute):
         '''
-        normalize attribute by z score method
+            normalize attribute by z score method
         '''
         column = self.get_column(attribute)
         if column is not None:
@@ -346,7 +404,7 @@ class dataframe:
                 id_column = self.attributes.index(attribute)
                 for i in range(len(self.data)):
                     self.data[i][id_column] = (column[i] - column_mean) / column_std
-                
+
             else:
                 print(f"{attribute} is not numeric!")
         else:
@@ -354,6 +412,9 @@ class dataframe:
 
 
     def normalize(self, args):
+        '''
+            handle normalize command
+        '''
         if args.method == "min_max":
             self.min_max_normalize(args.attribute)
         elif args.method == "z_score":
@@ -361,13 +422,19 @@ class dataframe:
         else:
             print("Unknown method: Only min_max and z_score are accepted");
 
-        self.save_csv(args.output)
+        if args.output:
+            self.save_csv(args.output)
 
 
     def mutate(self, args):
+        '''
+            create new attribute by expression
+        '''
+
+        # get expression
         expression = ' '.join(args.expression)
 
-        # calculate expression using Polish Notation
+        # calculate expression using Polish Notation Algorithm
         # convert to postfix order
         postfix = PostorderConvert(expression)
         s = [];
