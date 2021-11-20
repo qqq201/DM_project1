@@ -8,15 +8,16 @@ def correct_datatype(c):
     '''
     if c == '':
         return None
+    try:
+        if str(float(c)) == c: return float(c)
+    except TypeError: return c
+    except ValueError: return c
 
     try:
         if str(int(c)) == c: return int(c)
-    except ValueError:
-        return c
-    try:
-        if str(float(c)) == c: return float(c)
-    except ValueError:
-        return c
+    except TypeError: return c
+    except ValueError: return c
+
 
 
 def mean(arr):
@@ -121,6 +122,16 @@ def standard_deviation(arr, mean, n):
     return math.sqrt(s / n)
 
 
+def attribute_type(arr):
+    '''
+        find datatype of array
+    '''
+    for value in arr:
+        if value is not None:
+            return type(value)
+    return None
+
+
 class Dataframe:
     def __init__(self):
         self.data = []  # 2D array
@@ -134,11 +145,14 @@ class Dataframe:
             self.data = list(reader)
             self.attributes = self.data[0]
 
-        self.data = [[correct_datatype(entry) for entry in row] for row in self.data[1:]]
+        n = len(self.data)
+        m = len(self.data[0])
+        self.data = [[correct_datatype(self.data[r][c]) for c in range(m)] for r in range(1, n)]
+
 
 
     def save_csv(self, file):
-        with open(file, 'w') as f:
+        with open(file, 'w', newline='') as f:
             write = csv.writer(f)
             # write the header
             write.writerow(self.attributes)
@@ -193,8 +207,7 @@ class Dataframe:
         for attr in attributes:
             column = self.get_column(attr)
             if column is not None:
-                datatype = type(column[0])
-
+                datatype = attribute_type(column)
                 if datatype == float or datatype == int:
                     # calculate mean
                     substitute = mode(column)
@@ -217,7 +230,7 @@ class Dataframe:
         for attr in attributes:
             column = self.get_column(attr)
             if column is not None:
-                datatype = type(column[0])
+                datatype = attribute_type(column)
 
                 if datatype == float or datatype == int:
                     # calculate mode
@@ -242,7 +255,7 @@ class Dataframe:
         for attr in attributes:
             column = self.get_column(attr)
             if column is not None:
-                datatype = type(column[0])
+                datatype = attribute_type(column)
 
                 if datatype == str:
                     # calculate mode
@@ -371,7 +384,7 @@ class Dataframe:
         '''
         column = self.get_column(attribute)
         if column is not None:
-            datatype = type(column[0])
+            datatype = attribute_type(column)
 
             if datatype == float or datatype == int:
                 column_min = min(column)
@@ -395,7 +408,7 @@ class Dataframe:
         '''
         column = self.get_column(attribute)
         if column is not None:
-            datatype = type(column[0])
+            datatype = attribute_type(column)
 
             if datatype == float or datatype == int:
                 column_mean = mean(column)
@@ -444,7 +457,7 @@ class Dataframe:
             if is_alphabet(entry[0]):
                 column = self.get_column(entry)
                 if column is not None:
-                    datatype = type(column[0])
+                    datatype = attribute_type(column)
 
                     if datatype == float or datatype == int:
                         s.append(column)
