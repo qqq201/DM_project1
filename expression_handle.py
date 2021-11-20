@@ -56,11 +56,30 @@ def operate(a, b, o):
     if len(a) != len(b):
         return None
 
+    result = []
     if o == '+':
-        return [a[i] + b[i] for i in range(len(a))]
-    if o == '-':
-        return [a[i] - b[i] for i in range(len(a))]
-    if o == '*':
-        return [a[i] * b[i] for i in range(len(a))]
-    if o == '/':
-        return [a[i] / b[i] for i in range(len(a))]
+        for i in range(len(a)):
+            if a[i] is not None and b[i] is not None:
+                result.append(a[i] + b[i])
+            else:
+                result.append(None)
+    elif o == '-':
+        for i in range(len(a)):
+            if a[i] is not None and b[i] is not None:
+                result.append(a[i] - b[i])
+            else:
+                result.append(None)
+    elif o == '*':
+        for i in range(len(a)):
+            if a[i] is not None and b[i] is not None:
+                result.append(a[i] * b[i])
+            else:
+                result.append(None)
+    elif o == '/':
+        for i in range(len(a)):
+            if a[i] is not None and b[i] is not None:
+                result.append(a[i] / b[i])
+            else:
+                result.append(None)
+
+    return result

@@ -33,6 +33,7 @@ def mean(arr):
             sum += arr[i]
             n += 1
 
+    print(sum / n)
     return sum / n
 
 
@@ -210,7 +211,7 @@ class Dataframe:
                 datatype = attribute_type(column)
                 if datatype == float or datatype == int:
                     # calculate mean
-                    substitute = mode(column)
+                    substitute = mean(column)
 
                     # impute mean
                     c = self.attributes.index(attr)
@@ -234,7 +235,7 @@ class Dataframe:
 
                 if datatype == float or datatype == int:
                     # calculate mode
-                    substitute = mode(column)
+                    substitute = median(column)
 
                     # impute mode
                     c = self.attributes.index(attr)
@@ -335,9 +336,8 @@ class Dataframe:
         for index in range(m):
             if missing_rates[index] * 100 / n <= threshold:
                 remain_index.append(index)
-            else:
-                self.attributes.pop(index)
 
+        self.attributes = [self.attributes[i] for i in remain_index]
         self.data = [[self.data[r][i] for i in remain_index] for r in range(n)]
 
 
