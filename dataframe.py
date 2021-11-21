@@ -77,11 +77,13 @@ def mode(arr):
 
     # find value with maximum frequency
     m = 0
+    s = ""
     for key in Dict:
         if Dict[key] > m and key != None:
-            m = key
+            s = key
+            m = Dict[key]
 
-    return m
+    return s
 
 
 def min(arr):
@@ -258,7 +260,7 @@ class Dataframe:
             if column is not None:
                 datatype = attribute_type(column)
 
-                if datatype == float or datatype == int:
+                if datatype == str:
                     # calculate mode
                     substitute = mode(column)
 
@@ -268,7 +270,7 @@ class Dataframe:
                         if column[r] is None:
                             self.data[r][c] = substitute
                 else:
-                    print(f"{attr} is not numeric!")
+                    print(f"{attr} is not nominal!")
             else:
                 print(f"Does not exist {attr}")
 
