@@ -78,8 +78,8 @@ def mode(arr):
     # find value with maximum frequency
     m = 0
     for key in Dict:
-        if Dict[key] > m :
-            m = Dict[key]
+        if Dict[key] > m and key != None:
+            m = key
 
     return m
 
@@ -234,10 +234,10 @@ class Dataframe:
                 datatype = attribute_type(column)
 
                 if datatype == float or datatype == int:
-                    # calculate mode
+                    # calculate median
                     substitute = median(column)
 
-                    # impute mode
+                    # impute median
                     c = self.attributes.index(attr)
                     for r in range(len(column)):
                         if column[r] is None:
@@ -258,7 +258,7 @@ class Dataframe:
             if column is not None:
                 datatype = attribute_type(column)
 
-                if datatype == str:
+                if datatype == float or datatype == int:
                     # calculate mode
                     substitute = mode(column)
 
@@ -268,7 +268,7 @@ class Dataframe:
                         if column[r] is None:
                             self.data[r][c] = substitute
                 else:
-                    print(f"{attr} is not nominal!")
+                    print(f"{attr} is not numeric!")
             else:
                 print(f"Does not exist {attr}")
 
@@ -310,8 +310,11 @@ class Dataframe:
         remain_index = []
 
         for index in range(n):
-            if missing_rates[index] * 100 / n <= threshold:
+            if missing_rates[index] * 100 / m <= threshold:
                 remain_index.append(index)
+            else:
+                print("Remove: ", end='')
+                print(self.data[index][0])
 
         self.data = [[self.data[r][c] for c in range(m)] for r in range(n) if r in remain_index]
 
